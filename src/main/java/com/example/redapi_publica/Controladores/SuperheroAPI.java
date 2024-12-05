@@ -1,4 +1,4 @@
-package com.example.redapi_publica;
+package com.example.redapi_publica.Controladores;
 
 import com.example.redapi_publica.Clases.SuperheroResponse;
 import retrofit2.Call;

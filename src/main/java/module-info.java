@@ -10,4 +10,6 @@ module com.example.redapi_publica {
     exports com.example.redapi_publica;
     exports com.example.redapi_publica.Clases;
     opens com.example.redapi_publica.Clases to javafx.fxml;
+    exports com.example.redapi_publica.Controladores;
+    opens com.example.redapi_publica.Controladores to javafx.fxml;
 }
