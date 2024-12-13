@@ -8,6 +8,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import retrofit2.Call;
 import retrofit2.Callback;
+import retrofit2.Response;
 
 import java.util.List;
 
@@ -16,15 +17,15 @@ public class HelloController {
     @FXML
     private TextField textoBuscar;
     @FXML
-    private TableColumn clRaza;
+    private TableColumn<Superhero, String> clRaza;
     @FXML
-    private TableView tablaDatos;
+    private TableView<Superhero> tablaDatos;
     @FXML
-    private TableColumn clGenero;
+    private TableColumn<Superhero, String> clGenero;
     @FXML
-    private TableColumn clNombre;
+    private TableColumn<Superhero, String> clNombre;
     @FXML
-    private TableColumn clPowerStats;
+    private TableColumn<Superhero, String> clPowerStats;
     @FXML
     private Button btnBuscar;
 
@@ -38,11 +39,18 @@ public class HelloController {
     private void initialize() {
         // Configurar columnas de la tabla
         clNombre.setCellValueFactory(new PropertyValueFactory<>("name"));
-        clPowerStats.setCellValueFactory(new PropertyValueFactory<>("power_stats"));
-        clGenero.setCellValueFactory(data -> data.getValue().getApariencia().getGenero() == null ?
-                null : new javafx.beans.property.SimpleStringProperty(data.getValue().getApareincia().getGenero()));
-        clRaza.setCellValueFactory(data -> data.getValue().getApariencia().getRaza() == null ?
-                null : new javafx.beans.property.SimpleStringProperty(data.getValue().getApariencia().getRaza()));
+        clPowerStats.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(
+                String.format("Int: %s, Str: %s, Spd: %s",
+                        data.getValue().getPowerstats().getIntelligence(),
+                        data.getValue().getPowerstats().getStrength(),
+                        data.getValue().getPowerstats().getSpeed())
+        ));
+        clGenero.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(
+                data.getValue().getAppearance().getGender()
+        ));
+        clRaza.setCellValueFactory(data -> new javafx.beans.property.SimpleStringProperty(
+                data.getValue().getAppearance().getRace()
+        ));
 
         // Evento al presionar el botón
         btnBuscar.setOnAction(event -> searchSuperhero());
@@ -50,21 +58,39 @@ public class HelloController {
 
     private void searchSuperhero() {
         String name = textoBuscar.getText().trim();
+        System.out.println(name);
         if (!name.isEmpty()) {
             superheroApi.buscarSuperheroe(name).enqueue(new Callback<SuperheroResponse>() {
                 @Override
                 public void onResponse(Call<SuperheroResponse> call, Response<SuperheroResponse> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         List<Superhero> resultados = response.body().getResultados();
-                        tablaDatos.getItems().setAll(resultados); // Actualizar la tabla con los resultados
+                        if (resultados != null && !resultados.isEmpty()) {
+                            tablaDatos.getItems().setAll(resultados); // Actualizar la tabla con los resultados
+                        } else {
+                            mostrarAlerta("Sin resultados", "No se encontraron superhéroes con ese nombre.");
+                        }
+                    } else {
+                        mostrarAlerta("Sin resultados", "No se encontraron superhéroes con ese nombre.");
                     }
                 }
 
                 @Override
                 public void onFailure(Call<SuperheroResponse> call, Throwable t) {
-                    t.printStackTrace(); // Manejar errores
+                    t.printStackTrace();
+                    mostrarAlerta("Error", "No se pudo conectar con la API. Intenta más tarde.");
                 }
             });
+        } else {
+            mostrarAlerta("Campo vacío", "Por favor, introduce un nombre de superhéroe.");
         }
+    }
+
+    private void mostrarAlerta(String titulo, String mensaje) {
+        Alert alerta = new Alert(Alert.AlertType.INFORMATION);
+        alerta.setTitle(titulo);
+        alerta.setHeaderText(null);
+        alerta.setContentText(mensaje);
+        alerta.showAndWait();
     }
 }

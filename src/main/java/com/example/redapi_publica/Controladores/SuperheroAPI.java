@@ -4,6 +4,7 @@ import com.example.redapi_publica.Clases.SuperheroResponse;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 public interface SuperheroAPI {
 
@@ -11,7 +12,5 @@ public interface SuperheroAPI {
 
     @GET("search/{name}")
     Call<SuperheroResponse> buscarSuperheroe(@Path("name") String name);
-
-
 
 }
